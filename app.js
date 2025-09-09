@@ -1,9 +1,10 @@
 const { 
     Client, GatewayIntentBits, SlashCommandBuilder,
     EmbedBuilder, ButtonBuilder,
-    ButtonStyle
+    ButtonStyle, ActionRowBuilder
  } = require('discord.js');
 require('dotenv').config();
+const questions = require('./questions.json');
 
 
 const token = process.env.DISCORDJS_TOKEN;
@@ -24,24 +25,36 @@ bot.on('ready', ()=>{
     bot.application.commands.create(quiz);
 });
 
-bot.on('interactionCreate', interaction=>{
+bot.on('interactionCreate', async (interaction)=>{
     if(!interaction.isChatInputCommand()|
         interaction.commandName!=='quiz') return;
     
     const embed = new EmbedBuilder()
       .setTitle("Question")
       .addFields(
-        { name: "Alice", value: "120", inline: true },
-        { name: "Bob", value: "95", inline: true },
-        { name: "Charlie", value: "88", inline: true }
+        { name: "Alice", value: "120", inline: true }
       );
-    const btnA = new ButtonBuilder()
-        .setCustomId('a')
-        .setLabel('A').
-        setStyle(ButtonStyle.Primary)
+    const btnA = makeBtn('a', 'A');
+    const btnB = makeBtn('b', 'B');
+    const btnC = makeBtn('c', 'C');
+    const btnD = makeBtn('d', 'D');
 
 
-    interaction.reply({ embeds: [embed] });
+    const row = new ActionRowBuilder()
+        .addComponents(btnA, btnB, btnC, btnD);
+
+await interaction.reply({
+  embeds: [embed],
+  components: [row],
+});
 })
 
 bot.login(token);
+
+function makeBtn(id, name)
+{
+    return new ButtonBuilder()
+            .setCustomId(id)
+            .setLabel(name).
+            setStyle(ButtonStyle.Primary);
+}
