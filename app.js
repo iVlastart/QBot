@@ -3,8 +3,8 @@ const {
     EmbedBuilder, ButtonBuilder,
     ButtonStyle, ActionRowBuilder
  } = require('discord.js');
-require('dotenv').config();
 const questions = require('./questions.json');
+require('dotenv').config();
 
 
 const token = process.env.DISCORDJS_TOKEN;
@@ -28,11 +28,18 @@ bot.on('ready', ()=>{
 bot.on('interactionCreate', async (interaction)=>{
     if(!interaction.isChatInputCommand()|
         interaction.commandName!=='quiz') return;
+
+    const question = questions[Math.floor(Math.random() * questions.length)];
+
     
     const embed = new EmbedBuilder()
       .setTitle("Question")
       .addFields(
-        { name: "Alice", value: "120", inline: true }
+        { name: question.question, value: " ", inline: false },
+        { name: `A) ${question.A}`, value: " ", inline: false },
+        { name: `B) ${question.B}`, value: " ", inline: false },
+        { name: `C) ${question.C}`, value: " ", inline: false },
+        { name: `D) ${question.D}`, value: " ", inline: false }
       );
     const btnA = makeBtn('a', 'A');
     const btnB = makeBtn('b', 'B');
