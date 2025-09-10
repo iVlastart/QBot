@@ -17,7 +17,7 @@ const bot = new Client({
     ]
 });
 const prefix = '!';
-bot.on('ready', ()=>{
+bot.on('clientReady', ()=>{
     console.log(`${bot.user.username} is online`);
     const quiz = new SlashCommandBuilder()
                     .setName('quiz')
@@ -26,34 +26,41 @@ bot.on('ready', ()=>{
 });
 
 bot.on('interactionCreate', async (interaction)=>{
-    if(!interaction.isChatInputCommand()|
-        interaction.commandName!=='quiz') return;
+    if(interaction.isChatInputCommand()&&
+        interaction.commandName==='quiz')
+    {
+      
 
-    const question = questions[Math.floor(Math.random() * questions.length)];
+      const question = questions[Math.floor(Math.random() * questions.length)];
+      const embed = new EmbedBuilder()
+        .setTitle("Question")
+        .addFields(
+          { name: question.question, value: " ", inline: false },
+          { name: `A) ${question.A}`, value: " ", inline: false },
+          { name: `B) ${question.B}`, value: " ", inline: false },
+          { name: `C) ${question.C}`, value: " ", inline: false },
+          { name: `D) ${question.D}`, value: " ", inline: false }
+        );
+      const btnA = makeBtn(`A_${question.answer}`, 'A');
+      const btnB = makeBtn(`B_${question.answer}`, 'B');
+      const btnC = makeBtn(`C_${question.answer}`, 'C');
+      const btnD = makeBtn(`D_${question.answer}`, 'D');
 
+      const row = new ActionRowBuilder()
+          .addComponents(btnA, btnB, btnC, btnD);
+
+      await interaction.reply({
+        embeds: [embed],
+        components: [row],
+      });
+    }
     
-    const embed = new EmbedBuilder()
-      .setTitle("Question")
-      .addFields(
-        { name: question.question, value: " ", inline: false },
-        { name: `A) ${question.A}`, value: " ", inline: false },
-        { name: `B) ${question.B}`, value: " ", inline: false },
-        { name: `C) ${question.C}`, value: " ", inline: false },
-        { name: `D) ${question.D}`, value: " ", inline: false }
-      );
-    const btnA = makeBtn('a', 'A');
-    const btnB = makeBtn('b', 'B');
-    const btnC = makeBtn('c', 'C');
-    const btnD = makeBtn('d', 'D');
-
-
-    const row = new ActionRowBuilder()
-        .addComponents(btnA, btnB, btnC, btnD);
-
-await interaction.reply({
-  embeds: [embed],
-  components: [row],
-});
+    if(interaction.isButton())
+    {
+      const [choice, correct] = interaction.customId.split("_");
+      await interaction.reply(choice === correct ? "✅ Correct!" : `❌ Wrong!
+The answer was ${correct}`);
+    }
 })
 
 bot.login(token);
@@ -62,6 +69,6 @@ function makeBtn(id, name)
 {
     return new ButtonBuilder()
             .setCustomId(id)
-            .setLabel(name).
-            setStyle(ButtonStyle.Primary);
+            .setLabel(name)
+            .setStyle(ButtonStyle.Primary);
 }
